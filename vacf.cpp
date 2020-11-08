@@ -91,7 +91,7 @@ VACF::VACF(int narg, char **arg)
       }
       timer->stop(); timer->print();
     }
-    iarg++;
+    ++iarg;
   }
   if (ncount < 1) return;
 
@@ -137,17 +137,17 @@ void VACF::write_acf()
   if (sysdim == 1){
     fprintf(fp,"# lag  ave-vacf\n");
     fprintf(fp,"# ps    ------ \n");
-    for (int i=0; i<nlag; i++) fprintf(fp,"%lg %lg\n", i*dstep*dt, sum[i][0]);
+    for (int i = 0; i < nlag; ++i) fprintf(fp,"%lg %lg\n", i*dstep*dt, sum[i][0]);
 
   } else if (sysdim == 2){
     fprintf(fp,"# lag  vacf-ave vacf-x  vacf-y\n");
     fprintf(fp,"# ps    ----     ----    ----  \n");
-    for (int i=0; i<nlag; i++) fprintf(fp,"%lg %lg %lg %lg\n", i*dstep*dt, (sum[i][0]+sum[i][1])*0.5, sum[i][0], sum[i][1]);
+    for (int i = 0; i < nlag; ++i) fprintf(fp,"%lg %lg %lg %lg\n", i*dstep*dt, (sum[i][0]+sum[i][1])*0.5, sum[i][0], sum[i][1]);
 
   } else {
     fprintf(fp,"# lag  vacf-ave vacf-x  vacf-y  vacf-z\n");
     fprintf(fp,"# ps    ----     ----    ----    ---- \n");
-    for (int i=0; i<nlag; i++) fprintf(fp,"%lg %lg %lg %lg %lg\n", i*dstep*dt, (sum[i][0]+sum[i][1]+sum[i][2])/3., sum[i][0], sum[i][1], sum[i][2]);
+    for (int i = 0; i < nlag; ++i) fprintf(fp,"%lg %lg %lg %lg %lg\n", i*dstep*dt, (sum[i][0]+sum[i][1]+sum[i][2])/3., sum[i][0], sum[i][1], sum[i][2]);
 
   }
 
@@ -175,8 +175,9 @@ void VACF::compute_acf()
     }
     if (sum)  memory->destroy(sum);
     sum = memory->create(sum, nlag, sysdim, "sum");
-    for (int i=0; i<nlag; i++)
-    for (int j=0; j<sysdim; j++) sum[i][j] = 0.;
+    for (int i = 0; i < nlag; ++i)
+    for (int j = 0; j < sysdim; ++j) sum[i][j] = 0.;
+
   } else if (ndat < nlag) {
     printf("Error: Too few data points read from this file!\n");
     return;
@@ -198,52 +199,52 @@ void VACF::compute_acf()
   double fac = 1./sqrt(double(ndat));
 
   // acf via fft
-  for (int itm=0; itm < vels->natom; itm++){
-    for (int i=0; i<ndat; i++) fftw_real[i] = vels->velx[i][itm] * fac;
-    for (int i=ndat; i<ntotal; i++) fftw_real[i] = 0.;
+  for (int itm = 0; itm < vels->natom; ++itm){
+    for (int i = 0; i < ndat; ++i) fftw_real[i] = vels->velx[i][itm] * fac;
+    for (int i = ndat; i < ntotal; ++i) fftw_real[i] = 0.;
 
     fftw_execute(r2c);
 
-    for (int i=0; i<ntotal/2+1; i++) fftw_cmpx[i] *= conj(fftw_cmpx[i]);
+    for (int i = 0; i < ntotal/2+1; ++i) fftw_cmpx[i] *= conj(fftw_cmpx[i]);
 
     fftw_execute(c2r);
 
-    for (int i=0; i<nlag; i++) sum[i][0] += fftw_real[i]/double(ndat-i);
+    for (int i = 0; i < nlag; ++i) sum[i][0] += fftw_real[i]/double(ndat-i);
 
-    ncount++;
+    ++ncount;
   }
 
   if (sysdim > 1){
-    for (int itm=0; itm < vels->natom; itm++){
-      for (int i=0; i<ndat; i++) fftw_real[i] = vels->vely[i][itm] * fac;
-      for (int i=ndat; i<ntotal; i++) fftw_real[i] = 0.;
+    for (int itm = 0; itm < vels->natom; ++itm){
+      for (int i = 0; i < ndat; ++i) fftw_real[i] = vels->vely[i][itm] * fac;
+      for (int i = ndat; i < ntotal; ++i) fftw_real[i] = 0.;
   
       fftw_execute(r2c);
   
-      for (int i=0; i<ntotal/2+1; i++) fftw_cmpx[i] *= conj(fftw_cmpx[i]);
+      for (int i = 0; i < ntotal/2+1; ++i) fftw_cmpx[i] *= conj(fftw_cmpx[i]);
   
       fftw_execute(c2r);
   
-      for (int i=0; i<nlag; i++) sum[i][1] += fftw_real[i]/double(ndat-i);
+      for (int i = 0; i < nlag; ++i) sum[i][1] += fftw_real[i]/double(ndat-i);
   
-      ncount++;
+      ++ncount;
     }
   }
 
   if (sysdim > 2){
-    for (int itm=0; itm < vels->natom; itm++){
-      for (int i=0; i<ndat; i++) fftw_real[i] = vels->velz[i][itm]*fac;
-      for (int i=ndat; i<ntotal; i++) fftw_real[i] = 0.;
+    for (int itm = 0; itm < vels->natom; ++itm){
+      for (int i = 0; i < ndat; ++i) fftw_real[i] = vels->velz[i][itm]*fac;
+      for (int i = ndat; i < ntotal; ++i) fftw_real[i] = 0.;
   
       fftw_execute(r2c);
   
-      for (int i=0; i<ntotal/2+1; i++) fftw_cmpx[i] *= conj(fftw_cmpx[i]);
+      for (int i = 0; i < ntotal/2+1; ++i) fftw_cmpx[i] *= conj(fftw_cmpx[i]);
   
       fftw_execute(c2r);
   
-      for (int i=0; i<nlag; i++) sum[i][2] += fftw_real[i]/double(ndat-i);
+      for (int i = 0; i < nlag; ++i) sum[i][2] += fftw_real[i]/double(ndat-i);
   
-      ncount++;
+      ++ncount;
     }
   }
 
@@ -254,7 +255,7 @@ void VACF::compute_acf()
   // normalize acf
 /*
   double ave[3]; ave[0] = ave[1] = ave[2] = 0.;
-  for (int i=0; i<nlag; i++)
+  for (int i = 0; i < nlag; ++i)
     for (int j=0; j<sysdim; j++) ave[j] += sum[i][j];
   for (int j=0; j<sysdim; j++) ave[j] /= nlag;
 
@@ -263,9 +264,9 @@ void VACF::compute_acf()
     for (int j=0; j<sysdim; j++) sum[i][j] = (sum[i][j] - ave[j])/(sum[0][j]-ave[j]);
   for (int j=0; j<sysdim; j++) sum[0][j] = 1.;
 */
-  for (int i=1; i<nlag; ++i)
-    for (int j=0; j<sysdim; j++) sum[i][j] /= sum[0][j];
-  for (int j=0; j<sysdim; ++j) sum[0][j] = 1.;
+  for (int i = 1; i < nlag; ++i)
+    for (int j = 0; j < sysdim; ++j) sum[i][j] /= sum[0][j];
+  for (int j = 0; j < sysdim; ++j) sum[0][j] = 1.;
 
   printf("Done!\n"); fflush(stdout);
 return;
@@ -293,15 +294,15 @@ void VACF::compute_dos()
 
   fftw_plan r2c = fftw_plan_dft_r2c_1d(ntotal, fftw_real, fftw_cmpx, FFTW_ESTIMATE);
 
-  for (int idim=0; idim<sysdim; idim++){
+  for (int idim = 0; idim<sysdim; idim++){
 
-    for (int i=0; i<nlag; i++) fftw_real[i] = sum[i][idim];
-    for (int i=nlag; i<ntotal; i++) fftw_real[i] = 0.;
+    for (int i = 0; i < nlag; ++i) fftw_real[i] = sum[i][idim];
+    for (int i = nlag; i < ntotal; ++i) fftw_real[i] = 0.;
 
     // FFT
     fftw_execute(r2c);
 
-    for (int i=0; i<ndos; i++) pdos[i][idim] = creal(fftw_cmpx[i]) - creal(fftw_cmpx[0]);
+    for (int i = 0; i < ndos; ++i) pdos[i][idim] = creal(fftw_cmpx[i]) - creal(fftw_cmpx[0]);
   }
 
 return;
@@ -329,18 +330,18 @@ void VACF::write_dos()
   if (sysdim == 1){
     fprintf(fp,"#freq   dos\n");
     fprintf(fp,"#THz    ---\n");
-    for (int i=istr; i<iend; i++) fprintf(fp,"%lg %lg\n", i*dv, pdos[i][0]);
+    for (int i = istr; i < iend; ++i) fprintf(fp,"%lg %lg\n", i*dv, pdos[i][0]);
 
   } else if (sysdim == 2){
-    fprintf(fp,"#freq dos-total dos-x dos-y\n");
-    fprintf(fp,"#THz   -------   ---   ---\n");
-    for (int i=istr; i<iend; i++) fprintf(fp,"%lg %lg %lg %lg\n", i*dv, (pdos[i][0] + pdos[i][1])*0.5, pdos[i][0], pdos[i][1]);
+    fprintf(fp,"#freq dos-x dos-y dos-total\n");
+    fprintf(fp,"#THz  ----- ----- ---------\n");
+    for (int i = istr; i < iend; ++i) fprintf(fp,"%lg %lg %lg %lg\n", i*dv, pdos[i][0], pdos[i][1], (pdos[i][0] + pdos[i][1])*0.5);
 
   } else {
-    fprintf(fp,"#freq dos-total dos-x dos-y dos-z\n");
-    fprintf(fp,"#THz   -------   ---   ---   ---\n");
-    for (int i=istr; i<iend; i++)
-      fprintf(fp,"%lg %lg %lg %lg %lg\n", i*dv, (pdos[i][0] + pdos[i][1] + pdos[i][2])/3., pdos[i][0], pdos[i][1], pdos[i][2]);
+    fprintf(fp,"#freq dos-x dos-y dos-z dos-total\n");
+    fprintf(fp,"#THz  ----- ----- ----- ---------\n");
+    for (int i = istr; i < iend; ++i)
+      fprintf(fp,"%lg %lg %lg %lg %lg\n", i*dv, pdos[i][0], pdos[i][1], pdos[i][2], (pdos[i][0] + pdos[i][1] + pdos[i][2])/3.);
   }
 
   fclose(fp);

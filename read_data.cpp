@@ -40,10 +40,10 @@ ReadVel::ReadVel(char *infile, int sdim)
   xsum = memory->create(xsum, natom, "xsum");
   ysum = memory->create(ysum, natom, "xsum");
   zsum = memory->create(zsum, natom, "xsum");
-  for (int i=0; i<natom; i++) xsum[i] = ysum[i] = zsum[i] = 0.;
+  for (int i = 0; i < natom; ++i) xsum[i] = ysum[i] = zsum[i] = 0.;
 
-  for (int i=0; i<5; i++) fgets(str, MAXLINE, fp);
-  for (int i=0; i<ntm; i++){
+  for (int i = 0; i < 5; ++i) fgets(str, MAXLINE, fp);
+  for (int i = 0; i < ntm; ++i){
     fgets(str, MAXLINE, fp);
 
     vx = atof(strtok(str, " \t\n\r\f"));
@@ -55,7 +55,7 @@ ReadVel::ReadVel(char *infile, int sdim)
 
   }
   steps[nstep] = istep;
-  nstep++;
+  ++nstep;
 
   // read the remaining 
   while ( 1 ){
@@ -75,8 +75,8 @@ ReadVel::ReadVel(char *infile, int sdim)
       steps = memory->grow(steps, nmax, "ReadVel_steps");
     }
 
-    for (int i=0; i<5; i++) fgets(str, MAXLINE, fp);
-    for (int i=0; i<ntm; i++){
+    for (int i = 0; i < 5; ++i) fgets(str, MAXLINE, fp);
+    for (int i = 0; i < ntm; ++i){
       fgets(str, MAXLINE, fp);
 
       vx = atof(strtok(str, " \t\n\r\f"));
@@ -89,7 +89,7 @@ ReadVel::ReadVel(char *infile, int sdim)
     }
     if (istep < steps[nstep-1]) break;
     steps[nstep] = istep;
-    nstep++;
+    ++nstep;
   }
   fclose(fp);
 
@@ -100,20 +100,20 @@ ReadVel::ReadVel(char *infile, int sdim)
     if (sdim > 2) velz = memory->grow(velz, nstep, natom, "ReadVel_velz");
     steps = memory->grow(steps, nstep, "ReadVel_steps");
   }
-  for (int i=0; i<natom; i++) xsum[i] /= nstep;
-  for (int is=0; is<nstep; is++)
-  for (int i=0; i<natom; i++) velx[is][i] -= xsum[i];
+  for (int i = 0; i < natom; ++i) xsum[i] /= nstep;
+  for (int is = 0; is < nstep; ++is)
+  for (int i = 0; i < natom; ++i) velx[is][i] -= xsum[i];
 
   if (sdim > 1){
-    for (int i=0; i<natom; i++) ysum[i] /= nstep;
-    for (int is=0; is<nstep; is++)
-    for (int i=0; i<natom; i++) vely[is][i] -= ysum[i];
+    for (int i = 0; i < natom; ++i) ysum[i] /= nstep;
+    for (int is = 0; is < nstep; ++is)
+    for (int i = 0; i < natom; ++i) vely[is][i] -= ysum[i];
   }
 
   if (sdim > 2){
-    for (int i=0; i<natom; i++) zsum[i] /= nstep;
-    for (int is=0; is<nstep; is++)
-    for (int i=0; i<natom; i++) velz[is][i] -= zsum[i];
+    for (int i = 0; i < natom; ++i) zsum[i] /= nstep;
+    for (int is = 0; is < nstep; ++is)
+    for (int i = 0; i < natom; ++i) velz[is][i] -= zsum[i];
   }
 
   memory->destroy(xsum);
