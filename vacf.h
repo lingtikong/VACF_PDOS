@@ -25,11 +25,14 @@ private:
   double **sum;
   double **pdos;
   double dt; // MD time step size in unit of ps
+  int ismear; // smearing method
+  double tau0, dtau; // smearing parameters, in unit of dt
 
   char  *outacf, *outdos;
 
   void read_acf(char *);
   void compute_acf();
+  double smearing(int);
   void compute_dos();
 
   int ndos;

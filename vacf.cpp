@@ -16,6 +16,7 @@ VACF::VACF(int narg, char **arg)
 
   dt = 1.e-3;
   sysdim = 3;
+  ismear = 0;
   nlag = ncount = ndos = 0;
   memory = new Memory();
   sum = NULL; pdos = NULL;
@@ -52,6 +53,12 @@ VACF::VACF(int narg, char **arg)
       if (++iarg >= narg) help();
       dlag = atoi(arg[iarg]);
       if (dlag < 1) dlag = 100;
+
+    } else if ( strcmp(arg[iarg], "-s") == 0) {
+      if (iarg+3 >= narg) help();
+      ismear = atoi(arg[++iarg]);
+      tau0 = atof(arg[++iarg]);
+      dtau = atof(arg[++iarg]);
 
     } else if ( strcmp(arg[iarg], "-dim") == 0) {
       if (++iarg >= narg) help();
@@ -251,23 +258,16 @@ void VACF::compute_acf()
   memory->destroy(fftw_real);
   memory->destroy(fftw_cmpx);
 
-
-  // normalize acf
-/*
-  double ave[3]; ave[0] = ave[1] = ave[2] = 0.;
-  for (int i = 0; i < nlag; ++i)
-    for (int j=0; j<sysdim; j++) ave[j] += sum[i][j];
-  for (int j=0; j<sysdim; j++) ave[j] /= nlag;
-
-  //double icr0 = 1./(sum[0] - ave);
-  for (int i=1; i<nlag; i++)
-    for (int j=0; j<sysdim; j++) sum[i][j] = (sum[i][j] - ave[j])/(sum[0][j]-ave[j]);
-  for (int j=0; j<sysdim; j++) sum[0][j] = 1.;
-*/
   for (int i = 1; i < nlag; ++i)
     for (int j = 0; j < sysdim; ++j) sum[i][j] /= sum[0][j];
   for (int j = 0; j < sysdim; ++j) sum[0][j] = 1.;
 
+  if (ismear > 0){
+    for (int i = 0; i < nlag; ++i){
+      double scale = smearing(i);
+      for (int j = 0; j < sysdim; ++j) sum[i][j] *= scale;
+    }
+  }
   printf("Done!\n"); fflush(stdout);
 return;
 }
@@ -399,6 +399,27 @@ return;
 }
 
 /* -----------------------------------------------------------------------------
+ * private method to bring the end part of the acf to zero.
+ * 1: Fermi-Dirac smearing;
+ * 2: Gaussian smearing.
+ * -------------------------------------------------------------------------- */
+void VACF::smearing(int istep)
+{
+  if (ismear == 1){
+     double x = (istep * dstep * dt - tau0)/dtau;
+     return 1./(1. + exp(x));
+
+  } else if (ismear == 2){
+     double x = (istep * dstep * dt - tau0)/dtau;
+     return 0.5*(1.-erf(x));
+
+  } else {
+     return 1.;
+  }
+
+}
+
+/* -----------------------------------------------------------------------------
  * private method to print help info
  * -------------------------------------------------------------------------- */
 void VACF::help()
@@ -413,6 +434,8 @@ void VACF::help()
   printf("  -od dos-file       : to define the output dos file name; default: dos_vacf.dat\n");
   printf("  -dt timestep       : to define the MD time step in ps; default: 1e-3\n");
   printf("  -l  lag-fraction   : to define the lag for acf as nlag=nsteps/lag-fraction; default: 100\n");
+  printf("  -s i tau0 dtau     : to define the smearing method and the parameters; default: not set\n");
+  printf("                       Suggested: tau0 = 5.*T, dtau = 0.5*T, with T the relaxation time.\n");
   printf("  -p  padding-acf    : to define the padding of acf as nlag * padding-acf, for dos; default: 10\n");
   printf("  -fr vmin vmax      : to define the frequency range to output the PDOS; default: 0 to max. (THz)\n");
   printf("  -r                 : to indicate the file to read is vacf instead of velocities.\n");
