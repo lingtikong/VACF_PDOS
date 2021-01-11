@@ -106,8 +106,17 @@ VACF::VACF(int narg, char **arg)
 
   timer->start();
   printf("\nNow to compute the pdos..."); fflush(stdout);
+  // apply smearing
+  if (ismear > 0){
+    for (int i = 0; i < nlag; ++i){
+      double scale = smearing(i);
+      for (int j = 0; j < sysdim; ++j) sum[i][j] *= scale;
+    }
+  }
+  // compute phDOS
   compute_dos();
   write_dos();
+
   printf("Done!");
   timer->stop(); timer->print();
  
@@ -262,12 +271,6 @@ void VACF::compute_acf()
     for (int j = 0; j < sysdim; ++j) sum[i][j] /= sum[0][j];
   for (int j = 0; j < sysdim; ++j) sum[0][j] = 1.;
 
-  if (ismear > 0){
-    for (int i = 0; i < nlag; ++i){
-      double scale = smearing(i);
-      for (int j = 0; j < sysdim; ++j) sum[i][j] *= scale;
-    }
-  }
   printf("Done!\n"); fflush(stdout);
 return;
 }
@@ -403,7 +406,7 @@ return;
  * 1: Fermi-Dirac smearing;
  * 2: Gaussian smearing.
  * -------------------------------------------------------------------------- */
-void VACF::smearing(int istep)
+double VACF::smearing(int istep)
 {
   if (ismear == 1){
      double x = (istep * dstep * dt - tau0)/dtau;
