@@ -1,7 +1,6 @@
 #include "vacf.h"
 #include "string.h"
 #include "timer.h"
-//#include <gsl/gsl_spline.h>
 
 #define MAXLINE 256
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
@@ -21,8 +20,7 @@ VACF::VACF(int narg, char **arg)
   memory = new Memory();
   sum = NULL; pdos = NULL;
   outacf = outdos = NULL;
-  dlag = 100;
-  npad = 10;
+  dlag = 10;
 
   Timer *timer = new Timer();
 
@@ -52,7 +50,7 @@ VACF::VACF(int narg, char **arg)
     } else if ( strcmp(arg[iarg], "-l") == 0) {
       if (++iarg >= narg) help();
       dlag = atoi(arg[iarg]);
-      if (dlag < 1) dlag = 100;
+      if (dlag < 1) dlag = 10;
 
     } else if ( strcmp(arg[iarg], "-s") == 0) {
       if (iarg+3 >= narg) help();
@@ -72,11 +70,6 @@ VACF::VACF(int narg, char **arg)
 
       if (vmin < 0.)    vmin = 0.;
       if (vmax <= vmin) vmax = 0.;
-
-    } else if ( strcmp(arg[iarg], "-p") == 0) {
-      if (++iarg >= narg) help();
-      npad = atoi(arg[iarg]);
-      if (npad < 1 ) npad = 10;
 
     } else if ( strcmp(arg[iarg], "-h") == 0) {
       help();
@@ -117,7 +110,7 @@ VACF::VACF(int narg, char **arg)
   compute_dos();
   write_dos();
 
-  printf("Done!");
+  printf("Done! ");
   timer->stop(); timer->print();
  
 return;
@@ -280,32 +273,30 @@ return;
  * -------------------------------------------------------------------------- */
 void VACF::compute_dos()
 {
-  double *fftw_real;
-  fftw_complex *fftw_cmpx;
+  double *fftw_in, *fftw_out;
 
-  int ntotal = nlag * npad;
+  int ntotal = nlag;
 
-  dv = 1./double(dstep*ntotal*dt);
+  dv = 1./double(dstep*2*(ntotal-1)*dt);
   ndos = ntotal/2;
   if (vmax > vmin) ndos = MIN(int(vmax/dv)+1, ndos); 
 
   if (pdos) memory->destroy(pdos);
   pdos = memory->create(pdos, ndos, sysdim, "pdos");
 
-  fftw_real = memory->create(fftw_real, ntotal, "fftw_real");
-  fftw_cmpx = memory->create(fftw_cmpx, ntotal/2+1, "fftw_cmpx");
+  fftw_in  = memory->create(fftw_in,  ntotal, "fftw_in");
+  fftw_out = memory->create(fftw_out, ntotal, "fftw_out");
 
-  fftw_plan r2c = fftw_plan_dft_r2c_1d(ntotal, fftw_real, fftw_cmpx, FFTW_ESTIMATE);
+  fftw_plan r2r = fftw_plan_r2r_1d(ntotal, fftw_in, fftw_out, FFTW_REDFT00, FFTW_ESTIMATE);
 
   for (int idim = 0; idim<sysdim; idim++){
 
-    for (int i = 0; i < nlag; ++i) fftw_real[i] = sum[i][idim];
-    for (int i = nlag; i < ntotal; ++i) fftw_real[i] = 0.;
+    for (int i = 0; i < nlag; ++i) fftw_in[i] = sum[i][idim];
 
     // FFT
-    fftw_execute(r2c);
+    fftw_execute(r2r);
 
-    for (int i = 0; i < ndos; ++i) pdos[i][idim] = creal(fftw_cmpx[i]) - creal(fftw_cmpx[0]);
+    for (int i = 0; i < ndos; ++i) pdos[i][idim] = fftw_out[i];
   }
 
 return;
@@ -363,7 +354,6 @@ void VACF::read_acf(char *acf_file)
   FILE *fp = fopen(acf_file, "r");
   int nmax = 10000;
   nlag = 0;
-  sum = memory->grow(sum, nmax, "sum");
 
   double t0;
   char oneline[MAXLINE];
@@ -376,7 +366,7 @@ void VACF::read_acf(char *acf_file)
     exit(1);
   } else if (sysdim > 2) sysdim -= 2;
   else sysdim--;
-  sum = memory->grow(sum, nmax, sysdim, "sum");
+  sum = memory->create(sum, nmax, sysdim, "sum");
 
   while (! feof(fp) ){
     if (nlag >= nmax){
@@ -439,7 +429,6 @@ void VACF::help()
   printf("  -l  lag-fraction   : to define the lag for acf as nlag=nsteps/lag-fraction; default: 100\n");
   printf("  -s i tau0 dtau     : to define the smearing method and the parameters; default: not set\n");
   printf("                       Suggested: tau0 = 5.*T, dtau = 0.5*T, with T the relaxation time.\n");
-  printf("  -p  padding-acf    : to define the padding of acf as nlag * padding-acf, for dos; default: 10\n");
   printf("  -fr vmin vmax      : to define the frequency range to output the PDOS; default: 0 to max. (THz)\n");
   printf("  -r                 : to indicate the file to read is vacf instead of velocities.\n");
   printf("  -dim sysdim        : to define the system dimension, [1, 3]; default: 3\n");
