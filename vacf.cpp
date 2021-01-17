@@ -130,7 +130,6 @@ return;
 VACF::~VACF()
 {
   if (vv0) delete vv0;
-  if (vels) delete vels;
   if (sum)  memory->destroy(sum);
   if (pdos) memory->destroy(pdos);
   if (outacf) delete []outacf;
@@ -289,8 +288,7 @@ void VACF::compute_dos()
   int ntotal = int(1./(2.*dstep*dt*vstep)) + 1;
 
   dv = 1./double(dstep*2*(ntotal-1)*dt);
-  ndos = ntotal/2;
-  if (vmax > vmin) ndos = MIN(int(vmax/dv)+1, ndos); 
+  ndos = int(vmax/dv)+1;
 
   if (pdos) memory->destroy(pdos);
   pdos = memory->create(pdos, ndos, sysdim, "pdos");
@@ -310,6 +308,7 @@ void VACF::compute_dos()
 
     for (int i = 0; i < ndos; ++i) pdos[i][idim] = fftw_out[i];
   }
+
   // calculate diffusion coefficients; if metal unit, D will be in cm^2/s.
   if (vv0){
     for (int j = 0; j < sysdim; ++j) vv0[j] = pdos[0][j]*vv0[j]*dstep*dt*1.e4;

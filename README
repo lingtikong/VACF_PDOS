@@ -15,7 +15,7 @@ dump  2  all custom n  dump-file vx vy vz
 dump_modify 2 sort id
 
 You can decompose your system into several groups and dump each
-group speparately, so as to avoid superhuge files.
+group speparately, so as to avoid super-huge files.
 
 Note, the "dump_modify sort id" is essential to guarantee the
 correctness of the acf and dos; it is also important to provide
@@ -28,6 +28,6 @@ time unit.
 
 LT Kong
 
-konglt@gmail.com
+konglt_at_sjtu.edu.cn
 
-Sep 2011
+Jan 2020
