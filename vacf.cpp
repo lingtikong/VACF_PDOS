@@ -278,7 +278,7 @@ void VACF::compute_dos()
   double *fftw_in, *fftw_out;
 
   int ntotal = int(1./(2.*dstep*dt*vstep)) + 1;
-  if (ntotal <= 2*nlag) ntotal = nlag * 2;
+  if (ntotal < nlag) ntotal = nlag;
 
   dv = 1./double(dstep*2*(ntotal-1)*dt);
   if (vmax <= ZERO){

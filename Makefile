@@ -10,8 +10,8 @@ INC    = $(FFTINC) $(LPKINC) $(USRINC) $(SPGINC) $(GSLINC)
 LIB    = $(FFTLIB) $(LPKLIB) $(USRLIB) $(SPGLIB) $(GSLLIB)
 
 # fftw 3 library
-FFTINC    = -I/opt/libs/fftw/3.2.2/include
-FFTLIB    = -L/opt/libs/fftw/3.2.2/lib -lfftw3
+FFTINC    = -I/opt/fftw/3.3.7/include
+FFTLIB    = -L/opt/fftw/3.3.7/lib -lfftw3
 
 # Lapack library
 #LPKINC = -I/opt/clapack/3.2.1/include
