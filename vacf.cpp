@@ -26,6 +26,7 @@ VACF::VACF(int narg, char **arg)
 
   int flag_read_acf = 0;
   vmin = vmax = 0.;
+  vstep = 0.01; // Default frequency step size, in unit of THz.
 
   int iarg = 1;
   while (iarg < narg){
@@ -70,6 +71,11 @@ VACF::VACF(int narg, char **arg)
 
       if (vmin < 0.)    vmin = 0.;
       if (vmax <= vmin) vmax = 0.;
+
+    } else if ( strcmp(arg[iarg], "-df") == 0) {
+      if (++iarg >= narg) help();
+      vstep = atof(arg[iarg]);
+      if (vstep <= 0.) help();
 
     } else if ( strcmp(arg[iarg], "-h") == 0) {
       help();
@@ -275,7 +281,7 @@ void VACF::compute_dos()
 {
   double *fftw_in, *fftw_out;
 
-  int ntotal = nlag;
+  int ntotal = int(1./(2.*dstep*dt*vstep)) + 1;
 
   dv = 1./double(dstep*2*(ntotal-1)*dt);
   ndos = ntotal/2;
@@ -292,12 +298,16 @@ void VACF::compute_dos()
   for (int idim = 0; idim<sysdim; idim++){
 
     for (int i = 0; i < nlag; ++i) fftw_in[i] = sum[i][idim];
+    for (int i = nlag; i < ntotal; ++i) fftw_in[i] = 0.;
 
     // FFT
     fftw_execute(r2r);
 
     for (int i = 0; i < ndos; ++i) pdos[i][idim] = fftw_out[i];
   }
+
+  // Normalize the phonon DOS
+  Normalize();
 
 return;
 }
@@ -459,4 +469,24 @@ int VACF::count_words(const char *line)
 
   memory->destroy(copy);
   return n;
+}
+
+/* ----------------------------------------------------------------------------
+ * Private method to normalize the DOS; Simpson's rule is used for the integration.
+ * ---------------------------------------------------------------------------- */
+void VACF::Normalize()
+{
+  double odd, even, psum;
+
+  for (int idim = 0; idim < sysdim; ++idim){
+    odd = even = psum = 0.;
+    for (int i = 1; i < ndos-1; i +=2) odd  += pdos[i][idim];
+    for (int i = 2; i < ndos-1; i +=2) even += pdos[i][idim];
+    psum = pdos[0][idim] + pdos[ndos-1][idim];
+    psum += 4.*odd + 2.*even;
+    psum = 3./(psum*dv);
+    for (int i = 0; i < ndos; ++i) pdos[i][idim] *= psum;
+  }
+ 
+  return;
 }

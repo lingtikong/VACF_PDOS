@@ -21,7 +21,7 @@ public:
 private:
   int ncount, nlag, sysdim;
   int dstep; // (steps[nalg] - steps[0])/nlag
-  int dlag, npad;
+  int dlag;
   double **sum;
   double **pdos;
   double dt; // MD time step size in unit of ps
@@ -36,13 +36,14 @@ private:
   void compute_dos();
 
   int ndos;
-  double vmin, vmax, dv;
+  double vmin, vmax, dv, vstep;
 
   void write_acf();
   void write_dos();
 
   void help();
   int  count_words(const char *);
+  void Normalize();
 };
 
 #endif
