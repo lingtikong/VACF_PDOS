@@ -68,7 +68,7 @@ ReadVel::ReadVel(char *infile, int sdim)
     ntm = atoi(strtok(str," \t\n\r\f"));
 
     if (nstep >= nmax){
-      nmax += 100000;
+      nmax += 10000;
       velx = memory->grow(velx, nmax, natom, "ReadVel_velx");
       if (sdim > 1) vely = memory->grow(vely, nmax, natom, "ReadVel_vely");
       if (sdim > 2) velz = memory->grow(velz, nmax, natom, "ReadVel_velz");

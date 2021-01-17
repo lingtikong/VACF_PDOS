@@ -2,6 +2,7 @@
 #include "string.h"
 #include "timer.h"
 
+#define ZERO 1.e-8
 #define MAXLINE 256
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
@@ -91,7 +92,7 @@ VACF::VACF(int narg, char **arg)
 
       } else {
         vels = new ReadVel(arg[iarg], sysdim);
-        compute_acf();
+        compute_acf(arg[iarg]);
 
         dstep = (vels->steps[nlag] - vels->steps[0])/nlag;
         delete vels; vels = NULL;
@@ -102,24 +103,20 @@ VACF::VACF(int narg, char **arg)
   }
   if (ncount < 1) return;
 
+  normal_acf();
   if (!flag_read_acf) write_acf();
 
   timer->start();
   printf("\nNow to compute the pdos..."); fflush(stdout);
 
-  // apply smearing
-  if (ismear > 0){
-    for (int i = 0; i < nlag; ++i){
-      double scale = smearing(i);
-      for (int j = 0; j < sysdim; ++j) sum[i][j] *= scale;
-    }
-  }
   // compute phDOS
   compute_dos();
+  normal_dos();
   write_dos();
 
   printf("Done! ");
   timer->stop(); timer->print();
+  delete timer;
  
 return;
 }
@@ -129,12 +126,8 @@ return;
  * -------------------------------------------------------------------------- */
 VACF::~VACF()
 {
-  if (vv0) delete vv0;
-  if (sum)  memory->destroy(sum);
-  if (pdos) memory->destroy(pdos);
   if (outacf) delete []outacf;
   if (outdos) delete []outdos;
-
   if (memory) delete memory;
 }
 
@@ -152,16 +145,19 @@ void VACF::write_acf()
   printf("\nNow to write the acf data.\n\n");
   FILE *fp=fopen(outacf, "w");
   if (sysdim == 1){
+    fprintf(fp,"# <v*v>(0): %lg\n", vv0[0]);
     fprintf(fp,"# lag  vacf-x\n");
     fprintf(fp,"# ps    ------ \n");
     for (int i = 0; i < nlag; ++i) fprintf(fp,"%lg %lg\n", i*dstep*dt, sum[i][0]);
 
   } else if (sysdim == 2){
+    fprintf(fp,"# <v*v>(0): %lg %lg\n", vv0[0], vv0[1]);
     fprintf(fp,"# lag  vacf-x  vacf-y vacf-ave\n");
     fprintf(fp,"# ps    ----     ----    ----  \n");
     for (int i = 0; i < nlag; ++i) fprintf(fp,"%lg %lg %lg %lg\n", i*dstep*dt, sum[i][0], sum[i][1], (sum[i][0]+sum[i][1])*0.5);
 
   } else {
+    fprintf(fp,"# <v*v>(0): %lg %lg %lg\n", vv0[0], vv0[1], vv0[2]);
     fprintf(fp,"# lag  vacf-x  vacf-y  vacf-z vacf-ave\n");
     fprintf(fp,"# ps    ----     ----    ----    ---- \n");
     for (int i = 0; i < nlag; ++i) fprintf(fp,"%lg %lg %lg %lg %lg\n", i*dstep*dt, sum[i][0], sum[i][1], sum[i][2], (sum[i][0]+sum[i][1]+sum[i][2])/3.);
@@ -175,7 +171,7 @@ void VACF::write_acf()
 /* -----------------------------------------------------------------------------
  * private method to compute the acf, using fftw
  * -------------------------------------------------------------------------- */
-void VACF::compute_acf()
+void VACF::compute_acf(char *fname)
 {
   int ndat = vels->nstep;
   if (ndat < 1) {
@@ -201,7 +197,7 @@ void VACF::compute_acf()
   }
   int ntotal = ndat + nlag; 
 
-  printf("Now to compute the acf... "); fflush(stdout);
+  printf("Now to compute acf for data read from %s... ", fname); fflush(stdout);
 
   // prepare fftw
   double *fftw_real;
@@ -267,12 +263,8 @@ void VACF::compute_acf()
 
   memory->destroy(fftw_real);
   memory->destroy(fftw_cmpx);
-
-  vv0 = memory->create(vv0, sysdim, "vv");
-  for (int j = 0; j < sysdim; ++j) vv0[j] = sum[0][j];
-
-  for (int i = 1; i < nlag; ++i)
-    for (int j = 0; j < sysdim; ++j) sum[i][j] /= vv0[j];
+  fftw_destroy_plan(r2c);
+  fftw_destroy_plan(c2r);
 
   printf("Done!\n"); fflush(stdout);
 return;
@@ -286,9 +278,16 @@ void VACF::compute_dos()
   double *fftw_in, *fftw_out;
 
   int ntotal = int(1./(2.*dstep*dt*vstep)) + 1;
+  if (ntotal <= 2*nlag) ntotal = nlag * 2;
 
   dv = 1./double(dstep*2*(ntotal-1)*dt);
-  ndos = int(vmax/dv)+1;
+  if (vmax <= ZERO){
+    ndos = ntotal / 3;
+
+  } else {
+    ndos = MIN(int(vmax/dv)+1, ntotal);
+
+  }
 
   if (pdos) memory->destroy(pdos);
   pdos = memory->create(pdos, ndos, sysdim, "pdos");
@@ -310,12 +309,7 @@ void VACF::compute_dos()
   }
 
   // calculate diffusion coefficients; if metal unit, D will be in cm^2/s.
-  if (vv0){
-    for (int j = 0; j < sysdim; ++j) vv0[j] = pdos[0][j]*vv0[j]*dstep*dt*1.e4;
-  }
-
-  // Normalize the phonon DOS
-  Normalize();
+  for (int j = 0; j < sysdim; ++j) vv0[j] = pdos[0][j]*vv0[j]*dstep*dt*1.e4;
 
 return;
 }
@@ -336,7 +330,7 @@ void VACF::write_dos()
   else istr = int(vmin/dv);
 
   if (vmax <= vmin) iend = ndos;
-  else iend = int(vmax/dv);
+  else iend = int(vmax/dv)+1;
   iend = MIN(iend, ndos);
 
   if (sysdim == 1){
@@ -379,14 +373,23 @@ void VACF::read_acf(char *acf_file)
   double t0;
   char oneline[MAXLINE];
   fgets(oneline, MAXLINE, fp);
+  if (vv0 == NULL){
+    vv0 = memory->create(vv0, 3, "vv0");
+    sprintf(oneline, "%s 0. 0.\n", oneline);
+    char *ptr = strtok(oneline," \r\t\n\f");
+    ptr = strtok(NULL, " \r\t\n\f");
+    for (int j = 0; j < 3; ++j) vv0[j] = atof(strtok(NULL, " \r\t\n\f"));
+  }
   fgets(oneline, MAXLINE, fp);
+  fgets(oneline, MAXLINE, fp);
+
   fgets(oneline, MAXLINE, fp);
   sysdim = count_words(oneline);
   if (sysdim < 2) {
     printf("Error: not enough columns in file %s!\n", acf_file);
     exit(1);
   } else if (sysdim > 2) sysdim -= 2;
-  else sysdim--;
+  else --sysdim;
   sum = memory->create(sum, nmax, sysdim, "sum");
 
   while (! feof(fp) ){
@@ -397,11 +400,12 @@ void VACF::read_acf(char *acf_file)
 
     t0 = atof(strtok(oneline," \r\t\n\f"));
     for (int i=0; i<sysdim; i++) sum[nlag][i] = atof(strtok(NULL," \r\t\n\f"));
-    nlag++;
+    ++nlag;
 
     fgets(oneline, MAXLINE, fp);
   }
   fclose(fp);
+
   dstep = 1;
   dt = t0/double(nlag-1);
 
@@ -483,9 +487,36 @@ int VACF::count_words(const char *line)
 }
 
 /* ----------------------------------------------------------------------------
+ * Private method to normalize the acf; smearing method will be used to bring
+ * long time term to zero, if defined.
+ * ---------------------------------------------------------------------------- */
+void VACF::normal_acf()
+{
+  if (vv0 == NULL){
+    vv0 = memory->create(vv0, sysdim, "vv");
+    for (int j = 0; j < sysdim; ++j) vv0[j] = sum[0][j];
+  }
+
+  for (int j = 0; j < sysdim; ++j){
+    for (int i = 1; i < nlag;   ++i) sum[i][j] /= sum[0][j];
+    sum[0][j] = 1.;
+  }
+
+  // apply smearing
+  if (ismear > 0){
+    for (int i = 0; i < nlag; ++i){
+      double scale = smearing(i);
+      for (int j = 0; j < sysdim; ++j) sum[i][j] *= scale;
+    }
+  }
+
+  return;
+}
+
+/* ----------------------------------------------------------------------------
  * Private method to normalize the DOS; Simpson's rule is used for the integration.
  * ---------------------------------------------------------------------------- */
-void VACF::Normalize()
+void VACF::normal_dos()
 {
   double odd, even, psum;
 

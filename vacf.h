@@ -31,7 +31,7 @@ private:
   char  *outacf, *outdos;
 
   void read_acf(char *);
-  void compute_acf();
+  void compute_acf(char *);
   double smearing(int);
   void compute_dos();
 
@@ -43,7 +43,8 @@ private:
 
   void help();
   int  count_words(const char *);
-  void Normalize();
+  void normal_dos();
+  void normal_acf();
 };
 
 #endif
