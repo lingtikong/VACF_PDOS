@@ -150,24 +150,24 @@ void VACF::write_acf()
   printf("\nNow to write the acf data.\n\n");
   FILE *fp=fopen(outacf, "w");
   if (sysdim == 1){
-    fprintf(fp,"# lag  ave-vacf\n");
+    fprintf(fp,"# lag  vacf-x\n");
     fprintf(fp,"# ps    ------ \n");
     for (int i = 0; i < nlag; ++i) fprintf(fp,"%lg %lg\n", i*dstep*dt, sum[i][0]);
 
   } else if (sysdim == 2){
-    fprintf(fp,"# lag  vacf-ave vacf-x  vacf-y\n");
+    fprintf(fp,"# lag  vacf-x  vacf-y vacf-ave\n");
     fprintf(fp,"# ps    ----     ----    ----  \n");
-    for (int i = 0; i < nlag; ++i) fprintf(fp,"%lg %lg %lg %lg\n", i*dstep*dt, (sum[i][0]+sum[i][1])*0.5, sum[i][0], sum[i][1]);
+    for (int i = 0; i < nlag; ++i) fprintf(fp,"%lg %lg %lg %lg\n", i*dstep*dt, sum[i][0], sum[i][1], (sum[i][0]+sum[i][1])*0.5);
 
   } else {
-    fprintf(fp,"# lag  vacf-ave vacf-x  vacf-y  vacf-z\n");
+    fprintf(fp,"# lag  vacf-x  vacf-y  vacf-z vacf-ave\n");
     fprintf(fp,"# ps    ----     ----    ----    ---- \n");
-    for (int i = 0; i < nlag; ++i) fprintf(fp,"%lg %lg %lg %lg %lg\n", i*dstep*dt, (sum[i][0]+sum[i][1]+sum[i][2])/3., sum[i][0], sum[i][1], sum[i][2]);
+    for (int i = 0; i < nlag; ++i) fprintf(fp,"%lg %lg %lg %lg %lg\n", i*dstep*dt, sum[i][0], sum[i][1], sum[i][2], (sum[i][0]+sum[i][1]+sum[i][2])/3.);
 
   }
 
   fclose(fp);
-
+  return;
 }
 
 /* -----------------------------------------------------------------------------
@@ -385,7 +385,6 @@ void VACF::read_acf(char *acf_file)
     }
 
     t0 = atof(strtok(oneline," \r\t\n\f"));
-    if (sysdim > 1) strtok(NULL," \r\t\n\f");
     for (int i=0; i<sysdim; i++) sum[nlag][i] = atof(strtok(NULL," \r\t\n\f"));
     nlag++;
 
@@ -440,6 +439,7 @@ void VACF::help()
   printf("  -s i tau0 dtau     : to define the smearing method and the parameters; default: not set\n");
   printf("                       Suggested: tau0 = 5.*T, dtau = 0.5*T, with T the relaxation time.\n");
   printf("  -fr vmin vmax      : to define the frequency range to output the PDOS; default: 0 to max. (THz)\n");
+  printf("  -df df             : to define the frequency stepsize to calculate/output the PDOS; default: 0.01 THz.\n");
   printf("  -r                 : to indicate the file to read is vacf instead of velocities.\n");
   printf("  -dim sysdim        : to define the system dimension, [1, 3]; default: 3\n");
   printf("  -h                 : to print this help info.\n\n\n");
