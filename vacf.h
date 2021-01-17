@@ -22,7 +22,7 @@ private:
   int ncount, nlag, sysdim;
   int dstep; // (steps[nalg] - steps[0])/nlag
   int dlag;
-  double **sum;
+  double **sum, *vv0;
   double **pdos;
   double dt; // MD time step size in unit of ps
   int ismear; // smearing method

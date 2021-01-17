@@ -18,7 +18,8 @@ VACF::VACF(int narg, char **arg)
   ismear = 0;
   nlag = ncount = ndos = 0;
   memory = new Memory();
-  sum = NULL; pdos = NULL;
+  vv0 = NULL;
+  sum = pdos = NULL;
   outacf = outdos = NULL;
   dlag = 10;
 
@@ -105,6 +106,7 @@ VACF::VACF(int narg, char **arg)
 
   timer->start();
   printf("\nNow to compute the pdos..."); fflush(stdout);
+
   // apply smearing
   if (ismear > 0){
     for (int i = 0; i < nlag; ++i){
@@ -127,11 +129,12 @@ return;
  * -------------------------------------------------------------------------- */
 VACF::~VACF()
 {
+  if (vv0) delete vv0;
   if (vels) delete vels;
   if (sum)  memory->destroy(sum);
   if (pdos) memory->destroy(pdos);
-  if (outacf) delete[]outacf;
-  if (outdos) delete[]outdos;
+  if (outacf) delete []outacf;
+  if (outdos) delete []outdos;
 
   if (memory) delete memory;
 }
@@ -266,9 +269,11 @@ void VACF::compute_acf()
   memory->destroy(fftw_real);
   memory->destroy(fftw_cmpx);
 
+  vv0 = memory->create(vv0, sysdim, "vv");
+  for (int j = 0; j < sysdim; ++j) vv0[j] = sum[0][j];
+
   for (int i = 1; i < nlag; ++i)
-    for (int j = 0; j < sysdim; ++j) sum[i][j] /= sum[0][j];
-  for (int j = 0; j < sysdim; ++j) sum[0][j] = 1.;
+    for (int j = 0; j < sysdim; ++j) sum[i][j] /= vv0[j];
 
   printf("Done!\n"); fflush(stdout);
 return;
@@ -305,6 +310,10 @@ void VACF::compute_dos()
 
     for (int i = 0; i < ndos; ++i) pdos[i][idim] = fftw_out[i];
   }
+  // calculate diffusion coefficients; if metal unit, D will be in cm^2/s.
+  if (vv0){
+    for (int j = 0; j < sysdim; ++j) vv0[j] = pdos[0][j]*vv0[j]*dstep*dt*1.e4;
+  }
 
   // Normalize the phonon DOS
   Normalize();
@@ -332,16 +341,19 @@ void VACF::write_dos()
   iend = MIN(iend, ndos);
 
   if (sysdim == 1){
+    if (vv0) fprintf(fp,"#Diffusion coefficients: %lg cm^2/s\n", vv0[0]);
     fprintf(fp,"#freq   dos\n");
     fprintf(fp,"#THz    ---\n");
     for (int i = istr; i < iend; ++i) fprintf(fp,"%lg %lg\n", i*dv, pdos[i][0]);
 
   } else if (sysdim == 2){
+    if (vv0) fprintf(fp,"#Diffusion coefficients: %lg, %lg, %lg (ave) cm^2/s\n", vv0[0], vv0[1], (vv0[0]+vv0[1])*0.5);
     fprintf(fp,"#freq dos-x dos-y dos-total\n");
     fprintf(fp,"#THz  ----- ----- ---------\n");
     for (int i = istr; i < iend; ++i) fprintf(fp,"%lg %lg %lg %lg\n", i*dv, pdos[i][0], pdos[i][1], (pdos[i][0] + pdos[i][1])*0.5);
 
   } else {
+    if (vv0) fprintf(fp,"#Diffusion coefficients: %lg, %lg, %lg, %lg (ave) cm^2/s\n", vv0[0], vv0[1], vv0[2], (vv0[0]+vv0[1]+vv0[2])/3.);
     fprintf(fp,"#freq dos-x dos-y dos-z dos-total\n");
     fprintf(fp,"#THz  ----- ----- ----- ---------\n");
     for (int i = istr; i < iend; ++i)
