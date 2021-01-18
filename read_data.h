@@ -12,7 +12,7 @@ public:
   ReadVel(char *, int);
   ~ReadVel();
 
-  int natom, ntm, nmax, nstep;
+  int natom, nstep;
   Memory *memory;
   double **velx, **vely, **velz;
 

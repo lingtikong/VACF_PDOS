@@ -27,9 +27,10 @@ ReadVel::ReadVel(char *infile, int sdim)
   fgets(str, MAXLINE, fp); fgets(str, MAXLINE, fp);
   int istep = atoi(strtok(str," \t\n\r\f"));
   fgets(str, MAXLINE, fp); fgets(str, MAXLINE, fp);
-  ntm = atoi(strtok(str," \t\n\r\f"));
+  int ntm = atoi(strtok(str," \t\n\r\f"));
 
-  natom = ntm; nmax = 200001;
+  natom = ntm;
+  int nmax = 200001;
   velx = memory->create(velx, nmax, natom, "ReadVel_velx");
   if (sdim > 1) vely = memory->create(vely, nmax, natom, "ReadVel_vely");
   if (sdim > 2) velz = memory->create(velz, nmax, natom, "ReadVel_velz");

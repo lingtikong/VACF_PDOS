@@ -180,7 +180,7 @@ void VACF::compute_acf(char *fname)
     return;
   }
 
-  int nttt = ndat/dlag; // set nlag as 1/10 of the total MD dumps
+  int nttt = ndat / dlag; // set nlag as 1/10 of the total MD dumps
   if (nlag == 0){
     nlag = nttt;
     if (nlag < 10){
@@ -205,7 +205,7 @@ void VACF::compute_acf(char *fname)
   fftw_complex *fftw_cmpx;
 
   fftw_real = memory->create(fftw_real, ntotal, "fftw_real");
-  fftw_cmpx = memory->create(fftw_cmpx, ntotal/2+1, "fftw_cmpx");
+  fftw_cmpx = memory->create(fftw_cmpx, ntotal/2+2, "fftw_cmpx");
 
   fftw_plan r2c = fftw_plan_dft_r2c_1d(ntotal, fftw_real, fftw_cmpx, FFTW_MEASURE);
   fftw_plan c2r = fftw_plan_dft_c2r_1d(ntotal, fftw_cmpx, fftw_real, FFTW_MEASURE);
@@ -223,7 +223,7 @@ void VACF::compute_acf(char *fname)
 
     fftw_execute(c2r);
 
-    for (int i = 0; i < nlag; ++i) sum[i][0] += fftw_real[i]/double(ndat-i);
+    for (int i = 0; i < nlag; ++i) sum[i][0] += fftw_real[i] / double(ndat-i);
 
     ++ncount;
   }
@@ -239,7 +239,7 @@ void VACF::compute_acf(char *fname)
   
       fftw_execute(c2r);
   
-      for (int i = 0; i < nlag; ++i) sum[i][1] += fftw_real[i]/double(ndat-i);
+      for (int i = 0; i < nlag; ++i) sum[i][1] += fftw_real[i] / double(ndat-i);
   
       ++ncount;
     }
@@ -256,7 +256,7 @@ void VACF::compute_acf(char *fname)
   
       fftw_execute(c2r);
   
-      for (int i = 0; i < nlag; ++i) sum[i][2] += fftw_real[i]/double(ndat-i);
+      for (int i = 0; i < nlag; ++i) sum[i][2] += fftw_real[i] / double(ndat-i);
   
       ++ncount;
     }
@@ -395,6 +395,7 @@ void VACF::read_acf(char *acf_file)
     exit(1);
   } else if (sysdim > 2) sysdim -= 2;
   else --sysdim;
+
   sum = memory->create(sum, nmax, sysdim, "sum");
 
   while (! feof(fp) ){
@@ -404,7 +405,7 @@ void VACF::read_acf(char *acf_file)
     }
 
     t0 = atof(strtok(oneline," \r\t\n\f"));
-    for (int i=0; i<sysdim; i++) sum[nlag][i] = atof(strtok(NULL," \r\t\n\f"));
+    for (int i = 0; i < sysdim; ++i) sum[nlag][i] = atof(strtok(NULL," \r\t\n\f"));
     ++nlag;
 
     fgets(oneline, MAXLINE, fp);
@@ -412,7 +413,7 @@ void VACF::read_acf(char *acf_file)
   fclose(fp);
 
   dstep = 1;
-  dt = t0/double(nlag-1);
+  dt = t0 / double(nlag-1);
 
   printf("Done! %d data read.\n", nlag);
   ncount = 1;
