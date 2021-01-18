@@ -106,10 +106,9 @@ VACF::VACF(int narg, char **arg)
   normal_acf();
   if (!flag_read_acf) write_acf();
 
+  // compute phDOS
   timer->start();
   printf("\nNow to compute the pdos..."); fflush(stdout);
-
-  // compute phDOS
   compute_dos();
   normal_dos();
   write_dos();
@@ -126,6 +125,8 @@ return;
  * -------------------------------------------------------------------------- */
 VACF::~VACF()
 {
+  memory->destroy(sum);
+  memory->destroy(pdos);
   if (outacf) delete []outacf;
   if (outdos) delete []outdos;
   if (memory) delete memory;
@@ -297,7 +298,7 @@ void VACF::compute_dos()
 
   fftw_plan r2r = fftw_plan_r2r_1d(ntotal, fftw_in, fftw_out, FFTW_REDFT00, FFTW_ESTIMATE);
 
-  for (int idim = 0; idim<sysdim; idim++){
+  for (int idim = 0; idim < sysdim; ++idim){
 
     for (int i = 0; i < nlag; ++i) fftw_in[i] = sum[i][idim];
     for (int i = nlag; i < ntotal; ++i) fftw_in[i] = 0.;
@@ -307,6 +308,10 @@ void VACF::compute_dos()
 
     for (int i = 0; i < ndos; ++i) pdos[i][idim] = fftw_out[i];
   }
+
+  memory->destroy(fftw_in);
+  memory->destroy(fftw_out);
+  fftw_destroy_plan(r2r);
 
   // calculate diffusion coefficients; if metal unit, D will be in cm^2/s.
   for (int j = 0; j < sysdim; ++j) vv0[j] = pdos[0][j]*vv0[j]*dstep*dt*1.e4;
@@ -330,7 +335,7 @@ void VACF::write_dos()
   else istr = int(vmin/dv);
 
   if (vmax <= vmin) iend = ndos;
-  else iend = int(vmax/dv)+1;
+  else iend = int(vmax/dv) + 1;
   iend = MIN(iend, ndos);
 
   if (sysdim == 1){

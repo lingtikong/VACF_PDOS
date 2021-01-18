@@ -2,7 +2,6 @@
 #define VACF_H
 
 #include "complex.h"
-//#include "/usr/include/complex.h"
 #include "fftw3.h"
 #include "stdio.h"
 #include "stdlib.h"
