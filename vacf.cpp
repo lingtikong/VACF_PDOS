@@ -314,7 +314,7 @@ void VACF::compute_dos()
   fftw_destroy_plan(r2r);
 
   // calculate diffusion coefficients; if metal unit, D will be in cm^2/s.
-  for (int j = 0; j < sysdim; ++j) vv0[j] = pdos[0][j]*vv0[j]*dstep*dt*1.e4;
+  for (int j = 0; j < sysdim; ++j) vv0[j] = pdos[0][j]*vv0[j]*dstep*dt*1.e-4 / sqrt(double(ntotal));
 
 return;
 }
@@ -428,18 +428,28 @@ return;
  * -------------------------------------------------------------------------- */
 double VACF::smearing(int istep)
 {
+  if (dtau <= ZERO) dtau = 0.2;
+  if (tau0 <= ZERO) tau0 = 2.0;
+
+  double x = istep * dstep * dt;
+  double dx = (x - tau0) / dtau;
+
   if (ismear == 1){
-     double x = (istep * dstep * dt - tau0)/dtau;
-     return 1./(1. + exp(x));
+     return 1./(1. + exp(dx));
 
   } else if (ismear == 2){
-     double x = (istep * dstep * dt - tau0)/dtau;
-     return 0.5*(1.-erf(x));
+     return 0.5*(1.-erf(dx));
 
-  } else {
-     return 1.;
+  } else if (ismear == 3){
+     if (dx < 0.) {
+        double x2 = dx * dx;
+        double x4 = x2 * x2;
+        return x4 / (1. + x4);
+     } else
+        return 0.;
+
   }
-
+  return 1.;
 }
 
 /* -----------------------------------------------------------------------------
