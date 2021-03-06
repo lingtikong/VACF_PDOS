@@ -149,19 +149,19 @@ void VACF::write_acf()
     fprintf(fp,"# <v*v>(0): %lg\n", vv0[0]);
     fprintf(fp,"# lag  vacf-x\n");
     fprintf(fp,"# ps    ------ \n");
-    for (int i = 0; i < nlag; ++i) fprintf(fp,"%lg %lg\n", i*dstep*dt, sum[i][0]);
+    for (int i = 0; i < nlag; ++i) fprintf(fp,"%lg %lg %lg\n", i*dstep*dt, sum[i][0], sum[i][0]*smearing(i));
 
   } else if (sysdim == 2){
     fprintf(fp,"# <v*v>(0): %lg %lg\n", vv0[0], vv0[1]);
     fprintf(fp,"# lag  vacf-x  vacf-y vacf-ave\n");
     fprintf(fp,"# ps    ----     ----    ----  \n");
-    for (int i = 0; i < nlag; ++i) fprintf(fp,"%lg %lg %lg %lg\n", i*dstep*dt, sum[i][0], sum[i][1], (sum[i][0]+sum[i][1])*0.5);
+    for (int i = 0; i < nlag; ++i) fprintf(fp,"%lg %lg %lg %lg\n", i*dstep*dt, sum[i][0], sum[i][1], (sum[i][0]+sum[i][1])*0.5*smearing(i));
 
   } else {
     fprintf(fp,"# <v*v>(0): %lg %lg %lg\n", vv0[0], vv0[1], vv0[2]);
     fprintf(fp,"# lag  vacf-x  vacf-y  vacf-z vacf-ave\n");
     fprintf(fp,"# ps    ----     ----    ----    ---- \n");
-    for (int i = 0; i < nlag; ++i) fprintf(fp,"%lg %lg %lg %lg %lg\n", i*dstep*dt, sum[i][0], sum[i][1], sum[i][2], (sum[i][0]+sum[i][1]+sum[i][2])/3.);
+    for (int i = 0; i < nlag; ++i) fprintf(fp,"%lg %lg %lg %lg %lg\n", i*dstep*dt, sum[i][0], sum[i][1], sum[i][2], (sum[i][0]+sum[i][1]+sum[i][2])/3.*smearing(i));
 
   }
 
@@ -447,6 +447,12 @@ double VACF::smearing(int istep)
         return x4 / (1. + x4);
      } else
         return 0.;
+
+  } else if (ismear == 4){
+     return 1./(1. + exp(dx*dx*dx));
+
+  } else if (ismear == 5){
+     return 0.5*(1.-erf(dx*dx*dx));
 
   }
   return 1.;
