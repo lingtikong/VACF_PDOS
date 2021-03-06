@@ -1,10 +1,25 @@
-## vacf
+# vacf
 
-- Introduction
+###  Introduction
 
-Program to compute the velocity-velocity autocorrelation and the
-phonon density of states based on the dumped velocities from 
-LAMMPS. To use this code, simply invoke:
+`vacf` is a home written code to evaluate the velocity-velocity autocorrelation
+function and then to compute the phonon density of states for an atomistic system
+based on the velocities of atoms. The velocity information will be read from a file
+in the LAMMPS dump format, which however can be generated from any molecular
+dynamics simulation code, especially LAMMPS.
+
+### Theoretical background
+
+The autocorrelation function (ACF) reveals how the value of a quantity at a given
+time/position correlates with its value at another time/position. Especially, for
+the time autocorrelation $C(t)$ of a quantity $v(t)$:
+$$ C(t) = \frac{\sum_{t_0} v(t + t_0) v(t_0)}{\sum_{t_0} v_(t_0) v(t_0)}. $$
+
+Where the summation goes over all time origins.
+
+### Installation
+
+### Usage
 
 vacf vel-dump-file-name(s)
 
@@ -29,11 +44,4 @@ to be correct. The desired unit for timestep is ps, in which
 case the corresponding frequency unit will be THz. For unit
 other than ps, the unit for frequency will by inverse of your
 time unit.
-
-- Theoretical background
-
-- Installation
-
-- Usage
-
-- Copyright
+### Copyright
