@@ -1,0 +1,39 @@
+## vacf
+
+- Introduction
+
+Program to compute the velocity-velocity autocorrelation and the
+phonon density of states based on the dumped velocities from 
+LAMMPS. To use this code, simply invoke:
+
+vacf vel-dump-file-name(s)
+
+The computed velocity-velocity autocorrelation will be written to
+acf.dat, unless one specify a file name via the "-oa acf-file-name"
+command line option. While the computed phonon density of states
+will be written to file "dos_vacf.dat", unless one specify a different
+file name via "-od dos-file-name".
+
+The velocities should be dumped via:
+dump  2  all custom n  dump-file vx vy vz
+dump_modify 2 sort id
+
+You can decompose your system into several groups and dump each
+group speparately, so as to avoid super-huge files.
+
+Note, the "dump_modify sort id" is essential to guarantee the
+correctness of the acf and dos; it is also important to provide
+the correct MD time step via command line option "-dt" to make
+sure the units of time (in acf file) and frequency (in dos file)
+to be correct. The desired unit for timestep is ps, in which
+case the corresponding frequency unit will be THz. For unit
+other than ps, the unit for frequency will by inverse of your
+time unit.
+
+- Theoretical background
+
+- Installation
+
+- Usage
+
+- Copyright
