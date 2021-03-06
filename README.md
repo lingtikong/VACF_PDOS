@@ -12,7 +12,9 @@ dynamics simulation code, especially LAMMPS.
 
 The autocorrelation function (ACF) reveals how the value of a quantity at a given
 time/position correlates with its value at another time/position. Especially, for
-the time autocorrelation $C(t)$ of a quantity $v(t)$:
+the time autocorrelation *C(t)* of a quantity *v(t)*:
+![](http://latex.codecogs.com/gif.latex?\\\tf_{t,d}=1+log(tf_{t,d}\))
+
 $$ C(t) = \frac{\sum_{t_0} v(t + t_0) v(t_0)}{\sum_{t_0} v_(t_0) v(t_0)}. $$
 
 Where the summation goes over all time origins.
