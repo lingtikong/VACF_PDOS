@@ -314,7 +314,8 @@ void VACF::compute_dos()
   fftw_destroy_plan(r2r);
 
   // calculate diffusion coefficients; if metal unit, D will be in cm^2/s.
-  for (int j = 0; j < sysdim; ++j) vv0[j] = pdos[0][j]*vv0[j]*dstep*dt*1.e-4 / sqrt(double(ntotal));
+  // The expression here might be wrong.
+  for (int j = 0; j < sysdim; ++j) vv0[j] = pdos[0][j]*vv0[j]*dstep*dt*1.e-4 / double(ntotal);
 
 return;
 }
@@ -339,19 +340,19 @@ void VACF::write_dos()
   iend = MIN(iend, ndos);
 
   if (sysdim == 1){
-    if (vv0) fprintf(fp,"#Diffusion coefficients: %lg cm^2/s\n", vv0[0]);
+    // if (vv0) fprintf(fp,"#Diffusion coefficients: %lg cm^2/s\n", vv0[0]);
     fprintf(fp,"#freq   dos\n");
     fprintf(fp,"#THz    ---\n");
     for (int i = istr; i < iend; ++i) fprintf(fp,"%lg %lg\n", i*dv, pdos[i][0]);
 
   } else if (sysdim == 2){
-    if (vv0) fprintf(fp,"#Diffusion coefficients: %lg, %lg, %lg (ave) cm^2/s\n", vv0[0], vv0[1], (vv0[0]+vv0[1])*0.5);
+    // if (vv0) fprintf(fp,"#Diffusion coefficients: %lg, %lg, %lg (ave) cm^2/s\n", vv0[0], vv0[1], (vv0[0]+vv0[1])*0.5);
     fprintf(fp,"#freq dos-x dos-y dos-total\n");
     fprintf(fp,"#THz  ----- ----- ---------\n");
     for (int i = istr; i < iend; ++i) fprintf(fp,"%lg %lg %lg %lg\n", i*dv, pdos[i][0], pdos[i][1], (pdos[i][0] + pdos[i][1])*0.5);
 
   } else {
-    if (vv0) fprintf(fp,"#Diffusion coefficients: %lg, %lg, %lg, %lg (ave) cm^2/s\n", vv0[0], vv0[1], vv0[2], (vv0[0]+vv0[1]+vv0[2])/3.);
+    // if (vv0) fprintf(fp,"#Diffusion coefficients: %lg, %lg, %lg, %lg (ave) cm^2/s\n", vv0[0], vv0[1], vv0[2], (vv0[0]+vv0[1]+vv0[2])/3.);
     fprintf(fp,"#freq dos-x dos-y dos-z dos-total\n");
     fprintf(fp,"#THz  ----- ----- ----- ---------\n");
     for (int i = istr; i < iend; ++i)

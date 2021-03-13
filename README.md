@@ -33,7 +33,7 @@ $$\int g(\nu)\mathrm{d}\nu = 1.$$
 
 For liquids or gases, the phonon DOS at $\Gamma$ does not go to zero. This is caused by diffusion
 of the atoms. The $g(0)$ correlates with the self diffusion coefficient by:
-$$D = \frac{k_BT}{m} g(0),$$
+$$D = \frac{k_BT}{4m} g(0),$$
 where $T$ is the temperature, $g(0)$ is the normalized phonon DOS at $\nu = 0.$, and $m$ is the
 atomic mass of the element.
 
