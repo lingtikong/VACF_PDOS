@@ -474,18 +474,18 @@ void VACF::help()
   printf("  -od dos-file       : to define the output dos file name; default: dos_vacf.dat\n");
   printf("  -dt timestep       : to define the MD time step in ps; default: 1e-3\n");
   printf("  -l  lag-fraction   : to define the lag for acf as nlag = nsteps/lag-fraction; default: 100\n");
-  printf("  -s i tau0 dtau     : to define the smearing method and the parameters; default: not set\n");
-  printf("                       For x = (t - tau0)/dtau, the available smearing functions are:\n");
-  printf("                        i = 1: S(x) = 1 / ( 1 + exp(x) )    (Fermi-Dirac); \n");
-  printf("                        i = 2: S(x) = (1 - erf(x))/2        (Gaussian); \n");
-  printf("                        i = 3: S(x) = x**4 / (1 + x**4)     (Power 4); \n");
-  printf("                        i = 4: S(x) = 1 / ( 1 + exp(x**3) ) (Cubic Fermi-Dirac); \n");
-  printf("                        i = 5: S(x) = (1 - erf(x**3))/2     (Cubic Gaussian); \n");
-  printf("                       tau0 should be on order of 2-5 times of T, dtau roughly one tenth of T,\n");
-  printf("                       with T the relaxation time.\n");
+  printf("  -s  i tau0 dtau    : to define the smearing method to bring the acf to zero; default: not set.\n");
+  printf("                       The available options are:\n");
+  printf("                         i = 1: S(x) = 1 / ( 1 + exp(x) )    (Fermi-Dirac); \n");
+  printf("                         i = 2: S(x) = (1 - erf(x))/2        (Gaussian); \n");
+  printf("                         i = 3: S(x) = x**4 / (1 + x**4)     (Power 4); \n");
+  printf("                         i = 4: S(x) = 1 / ( 1 + exp(x**3) ) (Cubic Fermi-Dirac); \n");
+  printf("                         i = 5: S(x) = (1 - erf(x**3))/2     (Cubic Gaussian); \n");
+  printf("                       where x = (t - tau0)/dtau. tau0 should be on order of 2-5 times of T,\n");
+  printf("                       dtau roughly one tenth of T, with T the relaxation time.\n");
   printf("  -fr vmin vmax      : to define the frequency range to output the PDOS; default: 0 to max. (THz)\n");
   printf("  -df df             : to define the frequency stepsize to calculate/output the PDOS; default: 0.01 THz.\n");
-  printf("  -r                 : to indicate the file to read is vacf instead of velocities.\n");
+  printf("  -r                 : to read the acf file and calculate pdos, skipping the velocities.\n");
   printf("  -dim sysdim        : to define the system dimension, [1, 3]; default: 3\n");
   printf("  -h                 : to print this help info.\n\n\n");
 
