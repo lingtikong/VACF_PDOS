@@ -475,6 +475,12 @@ void VACF::help()
   printf("  -dt timestep       : to define the MD time step in ps; default: 1e-3\n");
   printf("  -l  lag-fraction   : to define the lag for acf as nlag=nsteps/lag-fraction; default: 100\n");
   printf("  -s i tau0 dtau     : to define the smearing method and the parameters; default: not set\n");
+  printf("                       For x = (t - tau0)/dtau, the available smearing functions are:\n");
+  printf("                        i = 1: S(x) = 1 / ( 1 + exp(x) )    (Gaussian); \n");
+  printf("                        i = 2: S(x) = (1 - erf(x))/2        (Error function); \n");
+  printf("                        i = 3: S(x) = x**4 / (1 + x**4)     (Power 4); \n");
+  printf("                        i = 4: S(x) = 1 / ( 1 + exp(x**3) ) (Cubic Gaussian); \n");
+  printf("                        i = 5: S(x) = (1 - erf(x**3))/2     (Cubic Error function); \n");
   printf("                       Suggested: tau0 = 5.*T, dtau = 0.5*T, with T the relaxation time.\n");
   printf("  -fr vmin vmax      : to define the frequency range to output the PDOS; default: 0 to max. (THz)\n");
   printf("  -df df             : to define the frequency stepsize to calculate/output the PDOS; default: 0.01 THz.\n");
