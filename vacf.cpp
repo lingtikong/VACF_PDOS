@@ -442,12 +442,12 @@ double VACF::smearing(int istep)
      return 0.5*(1.-erf(dx));
 
   } else if (ismear == 3){
-     if (dx < 0.) {
+     if (dx > 0.) {
         double x2 = dx * dx;
         double x4 = x2 * x2;
-        return x4 / (1. + x4);
+        return 1. / (1. + x4);
      } else
-        return 0.;
+        return 1.;
 
   } else if (ismear == 4){
      return 1./(1. + exp(dx*dx*dx));
@@ -478,7 +478,7 @@ void VACF::help()
   printf("                       The available options are:\n");
   printf("                         i = 1: S(x) = 1 / ( 1 + exp(x) )    (Fermi-Dirac); \n");
   printf("                         i = 2: S(x) = (1 - erf(x))/2        (Gaussian); \n");
-  printf("                         i = 3: S(x) = x**4 / (1 + x**4)     (Power 4); \n");
+  printf("                         i = 3: S(x) = 1 / (1 + x**4)        (Power 4); \n");
   printf("                         i = 4: S(x) = 1 / ( 1 + exp(x**3) ) (Cubic Fermi-Dirac); \n");
   printf("                         i = 5: S(x) = (1 - erf(x**3))/2     (Cubic Gaussian); \n");
   printf("                       where x = (t - tau0)/dtau. tau0 should be on order of 2-5 times of T,\n");
