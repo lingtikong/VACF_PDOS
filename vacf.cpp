@@ -482,7 +482,7 @@ void VACF::help()
   printf("                         i = 4: S(x) = 1 / ( 1 + exp(x**3) ) (Cubic Fermi-Dirac); \n");
   printf("                         i = 5: S(x) = (1 - erf(x**3))/2     (Cubic Gaussian); \n");
   printf("                       where x = (t - tau0)/dtau. tau0 should be on order of 2-5 times of T,\n");
-  printf("                       dtau roughly one tenth of T, with T the relaxation time.\n");
+  printf("                       dtau roughly 1-2 times of T, with T the relaxation time.\n");
   printf("  -fr vmin vmax      : to define the frequency range to output the PDOS; default: 0 to max. (THz)\n");
   printf("  -df df             : to define the frequency stepsize to calculate/output the PDOS; default: 0.01 THz.\n");
   printf("  -r                 : to read the acf file and calculate pdos, skipping the velocities.\n");
