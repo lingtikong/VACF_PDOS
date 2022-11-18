@@ -465,16 +465,17 @@ double VACF::smearing(int istep)
  * -------------------------------------------------------------------------- */
 void VACF::help()
 {
-  printf("\nvacf  v 1.%d\n\nCode to compute the velocity-velocity autocorrelation based on\n", VERSION);
-  printf("velocities dumped from LAMMPS. The dump command should look like:\n");
+  printf("\nvacf  v 1.%d\n\nCode to compute the velocity-velocity autocorrelation and phonon density \n", VERSION);
+  printf("of states from MD generated velocities. The LAMMPS dump command should look like:\n");
   printf("  dump         2 all custom N file vx vy vz\n");
-  printf("  dump_modify  2 sort id\n\n");
+  printf("  dump_modify  2 sort id\n");
+  printf("But actually velocities dumped by any code will work if converted into the lammps dump format.\n\n");
   printf("Usage:\n  vacf [options] lmp-dump-file\n\n");
   printf("Available options:\n");
-  printf("  -oa vacf-file      : to define the output acf file name; default: acf.dat\n");
-  printf("  -od dos-file       : to define the output dos file name; default: dos_vacf.dat\n");
-  printf("  -dt timestep       : to define the MD time step in ps; default: 1e-3\n");
-  printf("  -l  lag-fraction   : to define the lag for acf as nlag = nsteps/lag-fraction; default: 100\n");
+  printf("  -oa vacf-file      : to define the output acf file name; default: acf.dat\n\n");
+  printf("  -od dos-file       : to define the output dos file name; default: dos_vacf.dat\n\n");
+  printf("  -dt timestep       : to define the MD time step in ps; default: 1e-3\n\n");
+  printf("  -l  lag-fraction   : to define the lag for acf as nlag = nsteps/lag-fraction; default: 100\n\n");
   printf("  -s  i tau0 dtau    : to define the smearing method to bring the acf to zero; default: not set.\n");
   printf("                       The available options are:\n");
   printf("                         i = 1: S(x) = 1 / ( 1 + exp(x) )    (Fermi-Dirac); \n");
@@ -483,11 +484,11 @@ void VACF::help()
   printf("                         i = 4: S(x) = 1 / ( 1 + exp(x**3) ) (Cubic Fermi-Dirac); \n");
   printf("                         i = 5: S(x) = (1 - erf(x**3))/2     (Cubic Gaussian); \n");
   printf("                       where x = (t - tau0)/dtau. tau0 should be on order of 2-5 times of T,\n");
-  printf("                       dtau roughly 1-2 times of T, with T the relaxation time.\n");
-  printf("  -fr vmin vmax      : to define the frequency range to output the PDOS; default: 0 to max. (THz)\n");
-  printf("  -df df             : to define the frequency stepsize to calculate/output the PDOS; default: 0.01 THz.\n");
-  printf("  -r                 : to read the acf file and calculate pdos, skipping the velocities.\n");
-  printf("  -dim sysdim        : to define the system dimension, [1, 3]; default: 3\n");
+  printf("                       dtau roughly 1-2 times of T, with T the relaxation time.\n\n");
+  printf("  -fr vmin vmax      : to define the frequency range to output the PDOS; default: 0 to max. (THz)\n\n");
+  printf("  -df df             : to define the frequency stepsize to calculate/output the PDOS; default: 0.01 THz.\n\n");
+  printf("  -r                 : to read the acf file and calculate pdos, skipping the velocities.\n\n");
+  printf("  -dim sysdim        : to define the system dimension, [1, 3]; default: 3\n\n");
   printf("  -h                 : to print this help info.\n\n\n");
 
   exit(0);
