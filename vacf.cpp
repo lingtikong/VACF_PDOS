@@ -467,8 +467,8 @@ void VACF::help()
 {
   printf("\nvacf  v 1.%d\n\nCode to compute the velocity-velocity autocorrelation and phonon density \n", VERSION);
   printf("of states from MD generated velocities. The LAMMPS dump command should look like:\n");
-  printf("  dump         2 all custom N file vx vy vz\n");
-  printf("  dump_modify  2 sort id\n");
+  printf("  dump         1 all custom 2 dump.v vx vy vz\n");
+  printf("  dump_modify  1 sort id\n");
   printf("But actually velocities dumped by any code will work if converted into the lammps dump format.\n\n");
   printf("Usage:\n  vacf [options] lmp-dump-file\n\n");
   printf("Available options:\n");
