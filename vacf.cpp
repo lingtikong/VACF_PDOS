@@ -1,6 +1,7 @@
 #include "vacf.h"
 #include "string.h"
 #include "timer.h"
+#include "version.h"
 
 #define ZERO 1.e-8
 #define MAXLINE 256
@@ -464,7 +465,7 @@ double VACF::smearing(int istep)
  * -------------------------------------------------------------------------- */
 void VACF::help()
 {
-  printf("\nvacf\n\nCode to compute the velocity-velocity autocorrelation based on\n");
+  printf("\nvacf  v 1.%d\n\nCode to compute the velocity-velocity autocorrelation based on\n", VERSION);
   printf("velocities dumped from LAMMPS. The dump command should look like:\n");
   printf("  dump         2 all custom N file vx vy vz\n");
   printf("  dump_modify  2 sort id\n\n");

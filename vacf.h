@@ -1,7 +1,7 @@
 #ifndef VACF_H
 #define VACF_H
 
-#include "complex.h"
+#include <complex.h>
 #include "fftw3.h"
 #include "stdio.h"
 #include "stdlib.h"

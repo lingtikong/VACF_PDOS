@@ -31,12 +31,6 @@ $$g(\nu) = \int_{-\infty}^{\infty}e^{2\pi i\nu} C(t)\mathrm{d}t.$$
 With `vacf`, the $g(\nu)$ will be normalized to one:
 $$\int g(\nu)\mathrm{d}\nu = 1.$$
 
-For liquids or gases, the phonon DOS at $\Gamma$ does not go to zero. This is caused by diffusion
-of the atoms. The $g(0)$ correlates with the self diffusion coefficient by:
-$$D = \frac{k_BT}{4m} g(0),$$
-where $T$ is the temperature, $g(0)$ is the normalized phonon DOS at $\nu = 0.$, and $m$ is the
-atomic mass of the element.
-
 ### Installation
 
 Preferrably, this code runs under Linux. A C++ compiler and the fftw library are
@@ -130,7 +124,7 @@ If one invoke `vacf -h`, the following help information will be provided:
   -dim sysdim        : to define the system dimension, [1, 3]; default: 3
   -h                 : to print this help info.
 ```
-Here I'd like to provide some explanation on the some of the options.
+Here some explanations on some of the options are provided:
 
 #### `-dt`
 This option defines the time step used in your molecular dynamics simulations in unit of `ps`.
@@ -183,7 +177,14 @@ This defines the dimension of your system. For example, `-dim 1` suggests that y
 is one dimensionnal and the atoms move along the x direction only. The dump file is expected
 to contain the `vx` data for all atoms only.
 
+### Citation
+For publications using this tool, the following paper is suggested to be cited:
+
+Dynamical stability of iron under high-temperature and high-pressure conditions
+L.T. Kong, J.F. Li, Q.W. Shi, H.J. Huang and K. Zhao
+EPL 97 (2012) 56004 doi: 10.1209/0295-5075/97/56004
+
 ### Copyright
 All copyrights are reserved to Prof. Lingti Kong ([:love_letter:](mailto:konglt@sjtu.edu.cn)).
 
-Mar 2021
+Nov 2022
