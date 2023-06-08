@@ -203,13 +203,13 @@ void VACF::compute_acf(char *fname)
 
   // prepare fftw
   double *fftw_real;
-  fftw_complex *fftw_cmpx;
+  complex<double> *fftw_cmpx;
 
   fftw_real = memory->create(fftw_real, ntotal, "fftw_real");
   fftw_cmpx = memory->create(fftw_cmpx, ntotal/2+2, "fftw_cmpx");
 
-  fftw_plan r2c = fftw_plan_dft_r2c_1d(ntotal, fftw_real, fftw_cmpx, FFTW_MEASURE);
-  fftw_plan c2r = fftw_plan_dft_c2r_1d(ntotal, fftw_cmpx, fftw_real, FFTW_MEASURE);
+  fftw_plan r2c = fftw_plan_dft_r2c_1d(ntotal, fftw_real, reinterpret_cast<fftw_complex*>(fftw_cmpx), FFTW_MEASURE);
+  fftw_plan c2r = fftw_plan_dft_c2r_1d(ntotal, reinterpret_cast<fftw_complex*>(fftw_cmpx), fftw_real, FFTW_MEASURE);
 
   double fac = 1./sqrt(double(ndat));
 
