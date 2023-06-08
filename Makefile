@@ -1,7 +1,7 @@
 .SUFFIXES : .o .cpp
 # compiler and flags
-CC     = icc #g++
-LINK   = $(CC) #-static
+CC     = icc
+LINK   = $(CC) -Bstatic
 CFLAGS = -O3 $(DEBUG) #-Wno-unused-result
 
 #
@@ -10,8 +10,8 @@ INC    = $(FFTINC) $(LPKINC) $(USRINC) $(SPGINC) $(GSLINC)
 LIB    = $(FFTLIB) $(LPKLIB) $(USRLIB) $(SPGLIB) $(GSLLIB)
 
 # fftw 3 library
-FFTINC    = -I/opt/fftw/3.3.7/include
-FFTLIB    = -L/opt/fftw/3.3.7/lib -lfftw3
+FFTINC    = -I/opt/software/fftw/include
+FFTLIB    = -L/opt/software/fftw/lib -lfftw3
 
 # Lapack library
 #LPKINC = -I/opt/clapack/3.2.1/include
@@ -37,7 +37,7 @@ SRC = $(wildcard *.cpp *.c)
 OBJ = $(SRC:.cpp=.o)
 
 #====================================================================
-all:  ${EXE}
+all: ver ${EXE}
 
 ${EXE}: $(OBJ)
 	$(LINK) $(OFLAGS) $(OBJ) $(LIB) -o $@
