@@ -475,7 +475,7 @@ void VACF::help()
   printf("  -oa vacf-file      : to define the output acf file name; default: acf.dat\n\n");
   printf("  -od dos-file       : to define the output dos file name; default: dos_vacf.dat\n\n");
   printf("  -dt timestep       : to define the MD time step in ps; default: 1e-3\n\n");
-  printf("  -l  lag-fraction   : to define the lag for acf as nlag = nsteps/lag-fraction; default: 100\n\n");
+  printf("  -l  lag-fraction   : to define the lag for acf as nlag = nsteps/lag-fraction; default: 10\n\n");
   printf("  -s  i tau0 dtau    : to define the smearing method to bring the acf to zero; default: not set.\n");
   printf("                       The available options are:\n");
   printf("                         i = 1: S(x) = 1 / ( 1 + exp(x) )    (Fermi-Dirac); \n");

@@ -26,7 +26,7 @@ $$C(t) = \frac{\sum_{i}\sum_{t_0} v_i(t + t_0) v_i(t_0)}{\sum_i\sum_{t_0} v_i(t_
 The phonon density of states (DOS) can be given from the velocity autocorrelation function
 by:
 
-$$g(\nu) = \int_{-\infty}^{\infty}e^{2\pi i\nu} C(t)\mathrm{d}t.$$
+$$g(\nu) = \int_{-\infty}^{\infty}e^{2\pi i\nu t} C(t)\mathrm{d}t.$$
 
 With `vacf`, the $g(\nu)$ will be normalized to one:
 $$\int g(\nu)\mathrm{d}\nu = 1.$$
